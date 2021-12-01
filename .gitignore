@@ -45,3 +45,6 @@
 
 # Composer lock
 /composer.lock
+
+# IDEA
+.idea/
