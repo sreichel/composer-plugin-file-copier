@@ -1,6 +1,6 @@
 <?php
 
-namespace Sasedev\Composer\Plugin\Filescopier;
+namespace Butopea\Composer\Plugin\Filescopier;
 
 use Composer\IO\IOInterface;
 use Composer\Composer;
@@ -43,7 +43,7 @@ class Processor
 		$debug = $config['debug'];
 
 		if ($debug) {
-			$this->io->write('[sasedev/composer-plugin-filecopier] basepath : '.$project_path);
+			$this->io->write('[butopea/composer-plugin-filecopier] basepath : '.$project_path);
 		}
 
 		$destination = $config['destination'];
@@ -60,8 +60,8 @@ class Processor
 		$source = $config['source'];
 
 		if ($debug) {
-			$this->io->write('[sasedev/composer-plugin-filecopier] init source : '.$source);
-			$this->io->write('[sasedev/composer-plugin-filecopier] init destination : '.$destination);
+			$this->io->write('[butopea/composer-plugin-filecopier] init source : '.$source);
+			$this->io->write('[butopea/composer-plugin-filecopier] init destination : '.$destination);
 		}
 
 		$sources = \glob($source, GLOB_MARK);
@@ -103,7 +103,7 @@ class Processor
 
 		if (false === \realpath($source)) {
 			if ($debug) {
-				$this->io->write('[sasedev/composer-plugin-filecopier] No copy : source ('.$source.') does not exist');
+				$this->io->write('[butopea/composer-plugin-filecopier] No copy : source ('.$source.') does not exist');
 			}
 		}
 
@@ -111,7 +111,7 @@ class Processor
 
 		if ($source === $destination && \is_dir($source)) {
 			if ($debug) {
-				$this->io->write('[sasedev/composer-plugin-filecopier] No copy : source ('.$source.') and destination ('.$destination.') are identicals');
+				$this->io->write('[butopea/composer-plugin-filecopier] No copy : source ('.$source.') and destination ('.$destination.') are identicals');
 			}
 			return true;
 		}
@@ -120,7 +120,7 @@ class Processor
 		// Check for symlinks
 		if (\is_link($source)) {
 			if ($debug) {
-				$this->io->write('[sasedev/composer-plugin-filecopier] Copying Symlink '.source.' to '.$destination);
+				$this->io->write('[butopea/composer-plugin-filecopier] Copying Symlink '.source.' to '.$destination);
 			}
 			$source_entry = \basename($source);
 			return \symlink(\readlink($source), $destination.'/'.$source_entry);
@@ -135,13 +135,13 @@ class Processor
 			// Make destination directory
 			if (!\is_dir($destination)) {
 				if ($debug) {
-					$this->io->write('[sasedev/composer-plugin-filecopier] New Folder '.$destination);
+					$this->io->write('[butopea/composer-plugin-filecopier] New Folder '.$destination);
 				}
 				\mkdir($destination);
 			}
 
 			if ($debug) {
-				$this->io->write('[sasedev/composer-plugin-filecopier] Scanning Folder '.$source);
+				$this->io->write('[butopea/composer-plugin-filecopier] Scanning Folder '.$source);
 			}
 
 			$dir = \dir($source);
@@ -167,7 +167,7 @@ class Processor
 				$destination = $destination.'/'.$source_entry;
 			}
 			if ($debug) {
-				$this->io->write('[sasedev/composer-plugin-filecopier] Copying File '.$source.' to '.$destination);
+				$this->io->write('[butopea/composer-plugin-filecopier] Copying File '.$source.' to '.$destination);
 			}
 
 			return \copy($source, $destination);

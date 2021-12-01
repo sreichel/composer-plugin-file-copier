@@ -1,6 +1,6 @@
 <?php
 
-namespace Sasedev\Composer\Plugin\Filescopier;
+namespace Butopea\Composer\Plugin\Filescopier;
 
 use Composer\Composer;
 use Composer\EventDispatcher\EventSubscriberInterface;

@@ -14,7 +14,7 @@ Installation / Usage
     ``` json
     {
         "require": {
-            "sasedev/composer-plugin-filecopier": ">=1.1.0"
+            "butopea/composer-plugin-filecopier": ">=1.1.0"
         }
     }
     ```
@@ -44,10 +44,10 @@ Installation / Usage
                     "destination" : "var/less/bootstrap",
                     "debug": "true"
                 }, {
-                    "source" : "src/Sasedev/ResBundle/Resources/less/bootstrap/*.less",
+                    "source" : "src/Butopea/ResBundle/Resources/less/bootstrap/*.less",
                     "destination" : "var/less/bootstrap"
                 }, {
-                    "source" : "/home/sasedev/Documents/*.pdf",
+                    "source" : "/home/butopea/Documents/*.pdf",
                     "destination" : "var/test"
                 }
             ]
