@@ -25,8 +25,8 @@ Installation / Usage
     {
         "extra": {
             "file-copy" : {
-                "source" : "vendor/twbs/bootstrap/less",
-                "destination" : "var/less/bootstrap",
+                "source": "vendor/twbs/bootstrap/less",
+                "target": "var/less/bootstrap",
                 "debug": "true"
             }
         }
@@ -40,15 +40,15 @@ Installation / Usage
         "extra": {
             "file-copy" : [
                 {
-                    "source" : "vendor/twbs/bootstrap/less",
-                    "destination" : "var/less/bootstrap",
+                    "source": "vendor/twbs/bootstrap/less",
+                    "target": "var/less/bootstrap",
                     "debug": "true"
                 }, {
-                    "source" : "src/Sreichel/ResBundle/Resources/less/bootstrap/*.less",
-                    "destination" : "var/less/bootstrap"
+                    "source": "src/Sreichel/ResBundle/Resources/less/bootstrap/*.less",
+                    "target": "var/less/bootstrap"
                 }, {
-                    "source" : "/home/sreichel/Documents/*.pdf",
-                    "destination" : "var/test"
+                    "source": "/home/sreichel/Documents/*.pdf",
+                    "target": "var/test"
                 }
             ]
         }
