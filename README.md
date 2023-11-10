@@ -14,7 +14,7 @@ Installation / Usage
     ``` json
     {
         "require": {
-            "sreichel/composer-plugin-file-copier": ">=1.1.0"
+            "sreichel/composer-plugin-file-copy": ">=1.1.0"
         }
     }
     ```
@@ -24,7 +24,7 @@ Installation / Usage
     ``` json
     {
         "extra": {
-            "file-copier" : {
+            "file-copy" : {
                 "source" : "vendor/twbs/bootstrap/less",
                 "destination" : "var/less/bootstrap",
                 "debug": "true"
@@ -38,7 +38,7 @@ Installation / Usage
     ``` json
     {
         "extra": {
-            "file-copier" : [
+            "file-copy" : [
                 {
                     "source" : "vendor/twbs/bootstrap/less",
                     "destination" : "var/less/bootstrap",

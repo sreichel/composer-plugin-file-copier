@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sreichel\Composer\Plugin\FileCopier;
+namespace Sreichel\Composer\Plugin\FileCopy;
 
 use Composer\Composer;
 use Composer\IO\IOInterface;
@@ -21,7 +21,7 @@ use function realpath;
 use function strlen;
 use function symlink;
 
-class Processor extends AbstractCopier
+class Processor extends AbstractCopy
 {
     public function __construct(Event $event)
     {
@@ -85,11 +85,11 @@ class Processor extends AbstractCopier
     private function processConfig(array $config): array
     {
         if (empty($config[static::CONFIG_SOURCE])) {
-            throw new InvalidArgumentException('The extra.file-copier.source setting is required to use this script handler.');
+            throw new InvalidArgumentException('The extra.file-copy.source setting is required to use this script handler.');
         }
 
         if (empty($config[static::CONFIG_TARGET])) {
-            throw new InvalidArgumentException('The extra.file-copier.target setting is required to use this script handler.');
+            throw new InvalidArgumentException('The extra.file-copy.target setting is required to use this script handler.');
         }
 
         if (empty($config[static::CONFIG_DEBUG]) || $config[static::CONFIG_DEBUG] != 'true') {

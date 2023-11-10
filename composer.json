@@ -1,5 +1,5 @@
 {
-	"name" : "sreichel/composer-plugin-file-copier",
+	"name" : "sreichel/composer-plugin-file-copy",
 	"description" : "Composer Plugin Mass Files Copier",
 	"keywords" : [
 		"composer plugin",

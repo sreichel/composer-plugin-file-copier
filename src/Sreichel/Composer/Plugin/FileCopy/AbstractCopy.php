@@ -2,18 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Sreichel\Composer\Plugin\FileCopier;
+namespace Sreichel\Composer\Plugin\FileCopy;
 
 use Composer\Composer;
 use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
-use InvalidArgumentException;
 
-abstract class AbstractCopier
+abstract class AbstractCopy
 {
-    protected const COMPOSER_EXTRA_NAME = 'file-copier';
+    protected const COMPOSER_EXTRA_NAME = 'file-copy';
 
     protected const CONFIG_DEBUG  = 'debug';
     protected const CONFIG_SOURCE = 'source';
