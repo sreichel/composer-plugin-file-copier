@@ -14,7 +14,7 @@ Installation / Usage
     ``` json
     {
         "require": {
-            "sreichel/composer-plugin-file-copier": ">=1.1.0"
+            "sreichel/composer-plugin-file-copy": ">=1.1.0"
         }
     }
     ```
@@ -24,9 +24,9 @@ Installation / Usage
     ``` json
     {
         "extra": {
-            "file-copier" : {
-                "source" : "vendor/twbs/bootstrap/less",
-                "destination" : "var/less/bootstrap",
+            "file-copy" : {
+                "source": "vendor/twbs/bootstrap/less",
+                "target": "var/less/bootstrap",
                 "debug": "true"
             }
         }
@@ -38,17 +38,17 @@ Installation / Usage
     ``` json
     {
         "extra": {
-            "file-copier" : [
+            "file-copy" : [
                 {
-                    "source" : "vendor/twbs/bootstrap/less",
-                    "destination" : "var/less/bootstrap",
+                    "source": "vendor/twbs/bootstrap/less",
+                    "target": "var/less/bootstrap",
                     "debug": "true"
                 }, {
-                    "source" : "src/Sreichel/ResBundle/Resources/less/bootstrap/*.less",
-                    "destination" : "var/less/bootstrap"
+                    "source": "src/Sreichel/ResBundle/Resources/less/bootstrap/*.less",
+                    "target": "var/less/bootstrap"
                 }, {
-                    "source" : "/home/sreichel/Documents/*.pdf",
-                    "destination" : "var/test"
+                    "source": "/home/sreichel/Documents/*.pdf",
+                    "target": "var/test"
                 }
             ]
         }

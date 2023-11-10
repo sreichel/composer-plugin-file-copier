@@ -1,5 +1,5 @@
 {
-	"name" : "sreichel/composer-plugin-file-copier",
+	"name" : "sreichel/composer-plugin-file-copy",
 	"description" : "Composer Plugin Mass Files Copier",
 	"keywords" : [
 		"composer plugin",
@@ -26,7 +26,8 @@
 	},
 	"require" : {
 		"php" : ">=7.4",
-		"composer-plugin-api" : "^2.0"
+		"composer-plugin-api" : "^2.0",
+		"symfony/polyfill-php80": "*"
 	},
 	"require-dev" : {
 		"composer/composer" : "^2.0|2.0@dev"
