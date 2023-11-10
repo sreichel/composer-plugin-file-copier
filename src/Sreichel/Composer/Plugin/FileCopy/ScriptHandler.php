@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sreichel\Composer\Plugin\FileCopier;
+namespace Sreichel\Composer\Plugin\FileCopy;
 
 use Composer\Composer;
 use Composer\EventDispatcher\EventSubscriberInterface;
@@ -11,21 +11,9 @@ use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
 use InvalidArgumentException;
 
-class ScriptHandler implements PluginInterface, EventSubscriberInterface
+class ScriptHandler extends AbstractCopy implements PluginInterface, EventSubscriberInterface
 {
     /**
-     * @var IOInterface $io
-     */
-    protected IOInterface $io;
-
-    /**
-     * @var Composer $composer
-     */
-    protected Composer $composer;
-
-    /**
-     * {@inheritDoc}
-     *
      * @see PluginInterface::activate
      */
     public function activate(Composer $composer, IOInterface $io)
@@ -53,26 +41,14 @@ class ScriptHandler implements PluginInterface, EventSubscriberInterface
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @see EventSubscriberInterface::getSubscribedEvents
      */
     public static function getSubscribedEvents(): array
     {
-        return array(
-            "post-install-cmd" => array(
-                array(
-                    'onPostCmd',
-                    0
-                )
-            ),
-            "post-update-cmd" => array(
-                array(
-                    'onPostCmd',
-                    0
-                )
-            )
-        );
+        return [
+            'post-install-cmd'  => [['onPostCmd', 0]],
+            'post-update-cmd'   => [['onPostCmd', 0]]
+        ];
     }
 
     /**
@@ -94,12 +70,12 @@ class ScriptHandler implements PluginInterface, EventSubscriberInterface
         $composer = $event->getComposer();
 
         $extras = $composer->getPackage()->getExtra();
-        if (!isset($extras['file-copier'])) {
-            $id->write('The parameter handler needs to be configured through the extra.file-copier setting.');
+        if (!isset($extras[static::COMPOSER_EXTRA_NAME])) {
+            $id->write('The parameter handler needs to be configured through the extra.file-copy setting.');
         } else {
-            $configs = $extras['file-copier'];
+            $configs = $extras[static::COMPOSER_EXTRA_NAME];
             if (!is_array($configs)) {
-                throw new InvalidArgumentException('The extra.file-copier setting must be an array or a configuration object.');
+                throw new InvalidArgumentException('The extra.file-copy setting must be an array or a configuration object.');
             }
 
             if (array_keys($configs) !== range(0, count($configs) - 1)) {
@@ -112,7 +88,7 @@ class ScriptHandler implements PluginInterface, EventSubscriberInterface
 
             foreach ($configs as $config) {
                 if (!is_array($config)) {
-                    throw new InvalidArgumentException('The extra.file-copier setting must be an array of configuration objects.');
+                    throw new InvalidArgumentException('The extra.file-copy setting must be an array of configuration objects.');
                 }
 
                 $processor->processCopy($config);
