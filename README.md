@@ -14,7 +14,7 @@ Installation / Usage
     ``` json
     {
         "require": {
-            "butopea/composer-plugin-filecopier": ">=1.1.0"
+            "sreichel/composer-plugin-file-copier": ">=1.1.0"
         }
     }
     ```
@@ -24,7 +24,7 @@ Installation / Usage
     ``` json
     {
         "extra": {
-            "filescopier" : {
+            "file-copier" : {
                 "source" : "vendor/twbs/bootstrap/less",
                 "destination" : "var/less/bootstrap",
                 "debug": "true"
@@ -38,23 +38,22 @@ Installation / Usage
     ``` json
     {
         "extra": {
-            "filescopier" : [
+            "file-copier" : [
                 {
                     "source" : "vendor/twbs/bootstrap/less",
                     "destination" : "var/less/bootstrap",
                     "debug": "true"
                 }, {
-                    "source" : "src/Butopea/ResBundle/Resources/less/bootstrap/*.less",
+                    "source" : "src/Sreichel/ResBundle/Resources/less/bootstrap/*.less",
                     "destination" : "var/less/bootstrap"
                 }, {
-                    "source" : "/home/butopea/Documents/*.pdf",
+                    "source" : "/home/sreichel/Documents/*.pdf",
                     "destination" : "var/test"
                 }
             ]
         }
     }
     ```
-
 
     > **Note:** The destination element must be a folder. if the destination folder does not exists, it is recursively created using `mkdir($destination, 0755, true)`.
 
@@ -68,7 +67,7 @@ Installation / Usage
 Requirements
 ------------
 
-PHP 5.5 or above (at least 5.5.9 recommended to avoid potential bugs)
+PHP 7.4 or above
 
 
 Authors

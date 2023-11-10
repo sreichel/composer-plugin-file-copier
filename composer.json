@@ -1,5 +1,5 @@
 {
-	"name" : "butopea/composer-plugin-filecopier",
+	"name" : "sreichel/composer-plugin-file-copier",
 	"description" : "Composer Plugin Mass Files Copier",
 	"keywords" : [
 		"composer plugin",
@@ -7,9 +7,15 @@
 		"recursive copy"
 	],
 	"license" : "MIT",
-	"authors" : [{
+	"authors" : [
+		{
 			"name" : "Salah Abdelkader Seif Eddine",
 			"email" : "seif.salah@gmail.com"
+		},
+		{
+			"name" : "Sven Reichel",
+			"email" : "github-sr@hotmail.com",
+			"role": "Maintainer"
 		}
 	],
 	"type" : "composer-plugin",
@@ -19,16 +25,13 @@
 		}
 	},
 	"require" : {
-		"php" : ">=5.5",
-		"composer-plugin-api" : "^1.0 || ^2.0"
+		"php" : ">=7.4",
+		"composer-plugin-api" : "^2.0"
 	},
 	"require-dev" : {
-		"composer/composer" : "^1.0|1.0@dev || ^2.0|2.0@dev"
+		"composer/composer" : "^2.0|2.0@dev"
 	},
 	"extra" : {
-		"class" : "Butopea\\Composer\\Plugin\\Filescopier\\ScriptHandler",
-		"branch-alias" : {
-			"dev-master" : "1.1.x-dev"
-		}
+		"class" : "Sreichel\\Composer\\Plugin\\FileCopier\\ScriptHandler"
 	}
 }
