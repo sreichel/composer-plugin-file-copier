@@ -7,6 +7,7 @@ namespace Sreichel\Composer\Plugin\FileCopy;
 use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\Script\Event;
+use Directory;
 use InvalidArgumentException;
 use function basename;
 use function copy;
@@ -21,99 +22,154 @@ use function realpath;
 use function strlen;
 use function symlink;
 
-class Processor extends AbstractCopy
+/**
+ * Class Processor
+ */
+class Processor implements MyPluginInterface
 {
+    /**
+     * @var Composer $composer
+     */
+    protected Composer $composer;
+
+    /**
+     * @var IOInterface $io
+     */
+    protected IOInterface $io;
+
+    /**
+     * @var string|null
+     */
+    protected ?string $projectPath = null;
+
+    /**
+     * @var string $io
+     */
+    protected string $vendor;
+
+    /**
+     * @param Event $event
+     */
     public function __construct(Event $event)
     {
         $this->io       = $event->getIO();
         $this->composer = $event->getComposer();
-        $this->vendor   = $event->getComposer()->getConfig()->get('vendor-dir');;
+
+        $vendorDir      = $event->getComposer()->getConfig()->get('vendor-dir');
+        assert(is_string($vendorDir));
+        $this->vendor   = $vendorDir;
     }
 
     /**
-     * @param array $config
+     * @param array<string, string> $config
      * @return void
      */
     public function processCopy(array $config)
     {
         $config = $this->processConfig($config);
-
         $projectPath = $this->getProjectPath();
 
-        $debug = $config[static::CONFIG_DEBUG];
+        $debug = $config[MyPluginInterface::CONFIG_DEBUG];
+        $debug = is_bool($debug) ? $debug : false;
+
         if ($debug) {
             $this->io->write('Base path : ' . $projectPath);
         }
 
-        $target = $config[static::CONFIG_TARGET];
-
-        if (strlen($target) == 0 || !str_starts_with($target, '/')) {
-            $target = $projectPath . $target;
-        }
-
-        if (false === realpath($target)) {
-            mkdir($target, 0755, true);
-        }
-        $target = realpath($target);
-
-        $configSource = $config[static::CONFIG_SOURCE];
-
-        /**
-         * @todo handle different links ...
-         */
-        if (!str_starts_with($configSource, $this->vendor . '/')) {
+        $configSource = $config[MyPluginInterface::CONFIG_SOURCE];
+        if (!str_starts_with($configSource, '/')) {
             $configSource = $this->vendor . '/' . $configSource;
         }
 
+        $sources = glob($configSource, GLOB_MARK);
+        if (empty($sources)) {
+            $this->io->write('No source files found: ' . $configSource);
+            return;
+        }
+
+        $target = $this->getTargetFromConfig($config);
         if ($debug) {
             $this->io->write('Source: ' . $configSource);
             $this->io->write('Target: ' . $target);
         }
 
-        $sources = glob($configSource, GLOB_MARK);
-        if (!empty($sources)) {
-            foreach ($sources as $source) {
-                $this->copyr($source, $target, $projectPath, $debug);
-            }
+        foreach ($sources as $source) {
+            $this->copyr($source, $target, $projectPath, $debug);
         }
     }
 
     /**
-     * @param array $config
-     * @return array
+     * @return string
+     */
+    protected function getProjectPath(): string
+    {
+        if ($this->projectPath === null) {
+            $this->projectPath = realpath($this->vendor . '/../') . '/';
+        }
+
+        return $this->projectPath;
+    }
+
+    /**
+     * @param array<string, bool|string> $config
+     * @return string[]
      */
     private function processConfig(array $config): array
     {
-        if (empty($config[static::CONFIG_SOURCE])) {
+        if (empty($config[MyPluginInterface::CONFIG_SOURCE])) {
             throw new InvalidArgumentException('The extra.file-copy.source setting is required to use this script handler.');
         }
 
-        if (empty($config[static::CONFIG_TARGET])) {
+        if (empty($config[MyPluginInterface::CONFIG_TARGET])) {
             throw new InvalidArgumentException('The extra.file-copy.target setting is required to use this script handler.');
         }
 
-        if (empty($config[static::CONFIG_DEBUG]) || $config[static::CONFIG_DEBUG] != 'true') {
-            $config[static::CONFIG_DEBUG] = false;
-        } else {
-            $config[static::CONFIG_DEBUG] = true;
-        }
+        $this->setDebugFromConfig($config);
 
         return $config;
     }
 
-    private function getTargetFromConfig(array $config)
+    /**
+     * @param array<string, bool|string> $config
+     * @return void
+     */
+    private function setDebugFromConfig(array &$config): void
     {
-        $target = $config[static::CONFIG_TARGET];
+        if ($this->io->isVerbose()) {
+            $config[MyPluginInterface::CONFIG_DEBUG] = true;
+            return;
+        }
 
-        if (strlen($target) == 0 || !str_starts_with($target, '/')) {
+        if (empty($config[MyPluginInterface::CONFIG_DEBUG])) {
+            $config[MyPluginInterface::CONFIG_DEBUG] = false;
+            return;
+        }
+
+        $config[MyPluginInterface::CONFIG_DEBUG] = $config[MyPluginInterface::CONFIG_DEBUG] === 'true';
+    }
+
+    /**
+     * @param string[] $config
+     * @return string
+     */
+    private function getTargetFromConfig(array $config): string
+    {
+        $target = $config[MyPluginInterface::CONFIG_TARGET];
+
+        if (strlen($target) === 0 || !str_starts_with($target, '/')) {
             $target = $this->getProjectPath() . $target;
         }
 
-        if (false === realpath($target)) {
+        if (realpath($target) === false) {
             mkdir($target, 0755, true);
         }
 
-        return realpath($target);
+        $target = realpath($target);
+        if ($target === false) {
+            throw new InvalidArgumentException('Target is invalid.');
+        }
+
+        return $target;
     }
 
     /**
@@ -129,14 +185,13 @@ class Processor extends AbstractCopy
             $source = $projectPath . $source;
         }
 
-        if (false === realpath($source)) {
+        if (realpath($source) === false) {
             if ($debug) {
                 $this->io->write('No copy : source ('.$source.') does not exist');
             }
         }
 
         $source = realpath($source);
-
         if ($source === $target && is_dir($source)) {
             if ($debug) {
                 $this->io->write('No copy : source ('.$source.') and target ('.$target.') are identical');
@@ -146,15 +201,18 @@ class Processor extends AbstractCopy
 
 
         // Check for symlinks
-        if (is_link($source)) {
+        if ($source && is_link($source)) {
             if ($debug) {
                 $this->io->write('Copying Symlink ' . $source . ' to ' . $target);
             }
             $source_entry = basename($source);
-            return symlink(readlink($source), $target . '/ '. $source_entry);
+            $link = readlink($source);
+            if ($link) {
+                return symlink($link, $target . '/ '. $source_entry);
+            }
         }
 
-        if (is_dir($source)) {
+        if ($source && is_dir($source)) {
             // Loop through the folder
             $source_entry = basename($source);
             if ($projectPath.$source_entry == $source) {
@@ -173,23 +231,25 @@ class Processor extends AbstractCopy
             }
 
             $dir = dir($source);
-            while (false !== $entry = $dir->read()) {
-                // Skip pointers
-                if ($entry == '.' || $entry == '..') {
-                    continue;
+            if ($dir instanceof Directory) {
+                while (false !== $entry = $dir->read()) {
+                    // Skip pointers
+                    if ($entry == '.' || $entry == '..') {
+                        continue;
+                    }
+
+                    // Deep copy directories
+                    $this->copyr($source . '/' . $entry, $target . '/' . $entry, $projectPath, $debug);
                 }
 
-                // Deep copy directories
-                $this->copyr($source . '/' . $entry, $target . '/' . $entry, $projectPath, $debug);
+                // Clean up
+                $dir->close();
+                return true;
             }
-
-            // Clean up
-            $dir->close();
-            return true;
         }
 
         // Simple copy for a file
-        if (is_file($source)) {
+        if ($source && is_file($source)) {
             $source_entry = basename($source);
             if ($projectPath.$source_entry == $source || is_dir($target)) {
                 $target = $target . '/' . $source_entry;

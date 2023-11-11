@@ -25,8 +25,8 @@ Installation / Usage
     {
         "extra": {
             "file-copy" : {
-                "source": "vendor/twbs/bootstrap/less",
-                "target": "var/less/bootstrap",
+                "source": "vendor/dir",
+                "target": "lib/vendor",
                 "debug": "true"
             }
         }
@@ -40,14 +40,14 @@ Installation / Usage
         "extra": {
             "file-copy" : [
                 {
-                    "source": "vendor/twbs/bootstrap/less",
-                    "target": "var/less/bootstrap",
+                    "source": "vendor/dir",
+                    "target": "lib/vendor",
                     "debug": "true"
                 }, {
-                    "source": "src/Sreichel/ResBundle/Resources/less/bootstrap/*.less",
+                    "source": "src/Some/Bundle/less/bootstrap/*.less",
                     "target": "var/less/bootstrap"
                 }, {
-                    "source": "/home/sreichel/Documents/*.pdf",
+                    "source": "/home/username/Documents/*.pdf",
                     "target": "var/test"
                 }
             ]
@@ -60,8 +60,6 @@ Installation / Usage
     > **Note:** If the destination folder is not an absolute path, the relative path is calculated using the vendorDir path (`$project_path = \realpath($this->composer->getConfig()->get('vendor-dir').'/../').'/'`;)
 
     > **Note:** The source element is evaluated using the php function `\glob($source, GLOB_MARK)` and a recursive copy is made for every result of this function into the destination folder
-
-3. Run Composer: `php composer.phar update`.
 
 
 Requirements

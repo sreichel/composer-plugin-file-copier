@@ -11,8 +11,21 @@ use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
 use InvalidArgumentException;
 
-class ScriptHandler extends AbstractCopy implements PluginInterface, EventSubscriberInterface
+/**
+ * Class ScriptHandler
+ */
+class ScriptHandler implements PluginInterface, EventSubscriberInterface
 {
+    /**
+     * @var Composer $composer
+     */
+    protected Composer $composer;
+
+    /**
+     * @var IOInterface $io
+     */
+    protected IOInterface $io;
+
     /**
      * @see PluginInterface::activate
      */
@@ -70,10 +83,10 @@ class ScriptHandler extends AbstractCopy implements PluginInterface, EventSubscr
         $composer = $event->getComposer();
 
         $extras = $composer->getPackage()->getExtra();
-        if (!isset($extras[static::COMPOSER_EXTRA_NAME])) {
+        if (!isset($extras[MyPluginInterface::COMPOSER_EXTRA_NAME])) {
             $id->write('The parameter handler needs to be configured through the extra.file-copy setting.');
         } else {
-            $configs = $extras[static::COMPOSER_EXTRA_NAME];
+            $configs = $extras[MyPluginInterface::COMPOSER_EXTRA_NAME];
             if (!is_array($configs)) {
                 throw new InvalidArgumentException('The extra.file-copy setting must be an array or a configuration object.');
             }
@@ -91,6 +104,7 @@ class ScriptHandler extends AbstractCopy implements PluginInterface, EventSubscr
                     throw new InvalidArgumentException('The extra.file-copy setting must be an array of configuration objects.');
                 }
 
+                /** @var array<string, string> $config */
                 $processor->processCopy($config);
             }
         }
