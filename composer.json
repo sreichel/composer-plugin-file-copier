@@ -33,6 +33,6 @@
 		"composer/composer" : "^2.0|2.0@dev"
 	},
 	"extra" : {
-		"class" : "Sreichel\\Composer\\Plugin\\FileCopier\\ScriptHandler"
+		"class" : "Sreichel\\Composer\\Plugin\\FileCopy\ScriptHandler"
 	}
 }
