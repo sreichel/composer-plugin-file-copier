@@ -37,7 +37,6 @@ class Processor extends AbstractCopy
     public function processCopy(array $config)
     {
         $config = $this->processConfig($config);
-
         $projectPath = $this->getProjectPath();
 
         $debug = $config[static::CONFIG_DEBUG];
@@ -45,33 +44,23 @@ class Processor extends AbstractCopy
             $this->io->write('Base path : ' . $projectPath);
         }
 
-        $target = $config[static::CONFIG_TARGET];
-
-        if (strlen($target) == 0 || !str_starts_with($target, '/')) {
-            $target = $projectPath . $target;
-        }
-
-        if (false === realpath($target)) {
-            mkdir($target, 0755, true);
-        }
-        $target = realpath($target);
-
-        $configSource = $config[static::CONFIG_SOURCE];
-
         /**
          * @todo handle different links ...
          */
+        $configSource = $config[static::CONFIG_SOURCE];
         if (!str_starts_with($configSource, $this->vendor . '/')) {
             $configSource = $this->vendor . '/' . $configSource;
         }
 
-        if ($debug) {
-            $this->io->write('Source: ' . $configSource);
-            $this->io->write('Target: ' . $target);
-        }
-
         $sources = glob($configSource, GLOB_MARK);
         if (!empty($sources)) {
+            $target = $this->getTargetFromConfig($config);
+
+            if ($debug) {
+                $this->io->write('Source: ' . $configSource);
+                $this->io->write('Target: ' . $target);
+            }
+
             foreach ($sources as $source) {
                 $this->copyr($source, $target, $projectPath, $debug);
             }
