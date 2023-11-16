@@ -47,7 +47,7 @@ Installation / Usage
                     "source": "src/Some/Bundle/less/bootstrap/*.less",
                     "target": "var/less/bootstrap"
                 }, {
-                    "source": "/home/username/Documents/*.pdf",
+                    "source": "/home/username/Documents/*.{js,css}",
                     "target": "var/test"
                 }
             ]
