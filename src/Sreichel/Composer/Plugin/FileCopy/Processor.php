@@ -81,7 +81,7 @@ class Processor implements MyPluginInterface
             $configSource = $this->vendor . '/' . $configSource;
         }
 
-        $sources = glob($configSource, GLOB_MARK);
+        $sources = glob($configSource, GLOB_MARK + GLOB_BRACE);
         if (empty($sources)) {
             $this->io->write('No source files found: ' . $configSource);
             return;
