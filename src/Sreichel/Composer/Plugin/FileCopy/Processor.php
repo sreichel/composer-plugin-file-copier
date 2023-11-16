@@ -64,7 +64,7 @@ class Processor
      * @param array<string, string> $config
      * @return void
      */
-    public function processCopy(array $config)
+    public function processCopy(array $config): void
     {
         $config = $this->processConfig($config);
         $projectPath = $this->getProjectPath();
@@ -82,7 +82,7 @@ class Processor
         }
 
         $sources = glob($configSource, GLOB_MARK + GLOB_BRACE);
-        if (empty($sources)) {
+        if ($sources === [] || $sources === false) {
             $this->io->write('No source files found: ' . $configSource);
             return;
         }
@@ -156,7 +156,7 @@ class Processor
     {
         $target = $config[ConfigInterface::CONFIG_TARGET];
 
-        if (strlen($target) === 0 || !str_starts_with($target, '/')) {
+        if ($target === '' || !str_starts_with($target, '/')) {
             $target = $this->getProjectPath() . $target;
         }
 
@@ -185,17 +185,16 @@ class Processor
             $source = $projectPath . $source;
         }
 
-        if (realpath($source) === false) {
-            if ($debug) {
-                $this->io->write('No copy : source ('.$source.') does not exist');
-            }
+        if (realpath($source) === false && $debug) {
+            $this->io->write('No copy : source (' . $source . ') does not exist');
         }
 
         $source = realpath($source);
         if ($source === $target && is_dir($source)) {
             if ($debug) {
-                $this->io->write('No copy : source ('.$source.') and target ('.$target.') are identical');
+                $this->io->write('No copy : source (' . $source . ') and target (' . $target . ') are identical');
             }
+
             return true;
         }
 
@@ -205,29 +204,32 @@ class Processor
             if ($debug) {
                 $this->io->write('Copying Symlink ' . $source . ' to ' . $target);
             }
+
             $source_entry = basename($source);
             $link = readlink($source);
             if ($link) {
-                return symlink($link, $target . '/ '. $source_entry);
+                return symlink($link, $target . '/ ' . $source_entry);
             }
         }
 
         if ($source && is_dir($source)) {
             // Loop through the folder
             $source_entry = basename($source);
-            if ($projectPath.$source_entry == $source) {
+            if ($projectPath . $source_entry === $source) {
                 $target = $target . '/' . $source_entry;
             }
+
             // Make destination directory
             if (!is_dir($target)) {
                 if ($debug) {
-                    $this->io->write('New Folder '.$target);
+                    $this->io->write('New Folder ' . $target);
                 }
+
                 mkdir($target);
             }
 
             if ($debug) {
-                $this->io->write('Scanning Folder '.$source);
+                $this->io->write('Scanning Folder ' . $source);
             }
 
             $dir = dir($source);
@@ -251,9 +253,10 @@ class Processor
         // Simple copy for a file
         if ($source && is_file($source)) {
             $source_entry = basename($source);
-            if ($projectPath.$source_entry == $source || is_dir($target)) {
+            if ($projectPath . $source_entry === $source || is_dir($target)) {
                 $target = $target . '/' . $source_entry;
             }
+
             if ($debug) {
                 $this->io->write('Copying File ' . $source . ' to ' . $target);
             }

@@ -29,7 +29,7 @@ class ScriptHandler implements PluginInterface, EventSubscriberInterface
     /**
      * @see PluginInterface::activate
      */
-    public function activate(Composer $composer, IOInterface $io)
+    public function activate(Composer $composer, IOInterface $io): void
     {
         $this->composer = $composer;
         $this->io = $io;
@@ -40,7 +40,7 @@ class ScriptHandler implements PluginInterface, EventSubscriberInterface
      * @param IOInterface $io
      * @return void
      */
-    public function deactivate(Composer $composer, IOInterface $io)
+    public function deactivate(Composer $composer, IOInterface $io): void
     {
     }
 
@@ -49,7 +49,7 @@ class ScriptHandler implements PluginInterface, EventSubscriberInterface
      * @param IOInterface $io
      * @return void
      */
-    public function uninstall(Composer $composer, IOInterface $io)
+    public function uninstall(Composer $composer, IOInterface $io): void
     {
     }
 
@@ -68,7 +68,7 @@ class ScriptHandler implements PluginInterface, EventSubscriberInterface
      * @param Event $event
      * @return void
      */
-    public function onPostCmd(Event $event)
+    public function onPostCmd(Event $event): void
     {
         self::buildParameters($event);
     }
@@ -77,24 +77,18 @@ class ScriptHandler implements PluginInterface, EventSubscriberInterface
      * @param Event $event
      * @return void
      */
-    public static function buildParameters(Event $event)
+    public static function buildParameters(Event $event): void
     {
-        $id = $event->getIO();
+        $io = $event->getIO();
         $composer = $event->getComposer();
 
         $extras = $composer->getPackage()->getExtra();
         if (!isset($extras[ConfigInterface::COMPOSER_EXTRA_NAME])) {
-            $id->write('The parameter handler needs to be configured through the extra.file-copy setting.');
+            $io->write('The parameter handler needs to be configured through the extra.file-copy setting.');
         } else {
             $configs = $extras[ConfigInterface::COMPOSER_EXTRA_NAME];
             if (!is_array($configs)) {
                 throw new InvalidArgumentException('The extra.file-copy setting must be an array or a configuration object.');
-            }
-
-            if (array_keys($configs) !== range(0, count($configs) - 1)) {
-                $configs = array(
-                    $configs
-                );
             }
 
             $processor = new Processor($event);
