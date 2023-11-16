@@ -25,7 +25,7 @@ use function symlink;
 /**
  * Class Processor
  */
-class Processor implements MyPluginInterface
+class Processor
 {
     /**
      * @var Composer $composer
@@ -69,14 +69,14 @@ class Processor implements MyPluginInterface
         $config = $this->processConfig($config);
         $projectPath = $this->getProjectPath();
 
-        $debug = $config[MyPluginInterface::CONFIG_DEBUG];
+        $debug = $config[ConfigInterface::CONFIG_DEBUG];
         $debug = is_bool($debug) ? $debug : false;
 
         if ($debug) {
             $this->io->write('Base path : ' . $projectPath);
         }
 
-        $configSource = $config[MyPluginInterface::CONFIG_SOURCE];
+        $configSource = $config[ConfigInterface::CONFIG_SOURCE];
         if (!str_starts_with($configSource, '/')) {
             $configSource = $this->vendor . '/' . $configSource;
         }
@@ -116,11 +116,11 @@ class Processor implements MyPluginInterface
      */
     private function processConfig(array $config): array
     {
-        if (empty($config[MyPluginInterface::CONFIG_SOURCE])) {
+        if (empty($config[ConfigInterface::CONFIG_SOURCE])) {
             throw new InvalidArgumentException('The extra.file-copy.source setting is required to use this script handler.');
         }
 
-        if (empty($config[MyPluginInterface::CONFIG_TARGET])) {
+        if (empty($config[ConfigInterface::CONFIG_TARGET])) {
             throw new InvalidArgumentException('The extra.file-copy.target setting is required to use this script handler.');
         }
 
@@ -136,16 +136,16 @@ class Processor implements MyPluginInterface
     private function setDebugFromConfig(array &$config): void
     {
         if ($this->io->isVerbose()) {
-            $config[MyPluginInterface::CONFIG_DEBUG] = true;
+            $config[ConfigInterface::CONFIG_DEBUG] = true;
             return;
         }
 
-        if (empty($config[MyPluginInterface::CONFIG_DEBUG])) {
-            $config[MyPluginInterface::CONFIG_DEBUG] = false;
+        if (empty($config[ConfigInterface::CONFIG_DEBUG])) {
+            $config[ConfigInterface::CONFIG_DEBUG] = false;
             return;
         }
 
-        $config[MyPluginInterface::CONFIG_DEBUG] = $config[MyPluginInterface::CONFIG_DEBUG] === 'true';
+        $config[ConfigInterface::CONFIG_DEBUG] = in_array($config[ConfigInterface::CONFIG_DEBUG], ['true', true], true);
     }
 
     /**
@@ -154,7 +154,7 @@ class Processor implements MyPluginInterface
      */
     private function getTargetFromConfig(array $config): string
     {
-        $target = $config[MyPluginInterface::CONFIG_TARGET];
+        $target = $config[ConfigInterface::CONFIG_TARGET];
 
         if (strlen($target) === 0 || !str_starts_with($target, '/')) {
             $target = $this->getProjectPath() . $target;

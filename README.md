@@ -11,24 +11,34 @@ Installation / Usage
 
 1. In your composer.json project's file add the requirements
 
+   ``` bash
+   composer require sreichel/composer-plugin-file-copy
+   ```
+
     ``` json
     {
         "require": {
-            "sreichel/composer-plugin-file-copy": ">=1.1.0"
+            "sreichel/composer-plugin-file-copy": "^1.0.0"
         }
     }
     ```
 
 2. In your composer.json project's file add the config in the extra element
 
+   ``` bash
+   composer config --json --merge extra.file-copy '[{"source": "vendor/dir", "target": "lib/vendor", "debug": true}]'
+   ```
+
     ``` json
     {
         "extra": {
-            "file-copy" : {
-                "source": "vendor/dir",
-                "target": "lib/vendor",
-                "debug": "true"
-            }
+            "file-copy" : [
+                {
+                    "source": "vendor/dir",
+                    "target": "lib/vendor",
+                    "debug": true
+                }
+            ]
         }
     }
     ```
@@ -42,7 +52,7 @@ Installation / Usage
                 {
                     "source": "vendor/dir",
                     "target": "lib/vendor",
-                    "debug": "true"
+                    "debug": true
                 }, {
                     "source": "src/Some/Bundle/less/bootstrap/*.less",
                     "target": "var/less/bootstrap"
@@ -55,11 +65,11 @@ Installation / Usage
     }
     ```
 
-    > **Note:** The destination element must be a folder. if the destination folder does not exists, it is recursively created using `mkdir($destination, 0755, true)`.
+    >    **Note:** The destination element must be a folder. if the destination folder does not exists, it is recursively created using `mkdir($destination, 0755, true)`.
 
-    > **Note:** If the destination folder is not an absolute path, the relative path is calculated using the vendorDir path (`$project_path = \realpath($this->composer->getConfig()->get('vendor-dir').'/../').'/'`;)
+    >    **Note:** If the destination folder is not an absolute path, the relative path is calculated using the vendorDir path (`$project_path = \realpath($this->composer->getConfig()->get('vendor-dir').'/../').'/'`;)
 
-    > **Note:** The source element is evaluated using the php function `\glob($source, GLOB_MARK)` and a recursive copy is made for every result of this function into the destination folder
+    >    **Note:** The source element is evaluated using the php function `\glob($source, GLOB_MARK)` and a recursive copy is made for every result of this function into the destination folder
 
 
 Requirements

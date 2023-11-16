@@ -83,10 +83,10 @@ class ScriptHandler implements PluginInterface, EventSubscriberInterface
         $composer = $event->getComposer();
 
         $extras = $composer->getPackage()->getExtra();
-        if (!isset($extras[MyPluginInterface::COMPOSER_EXTRA_NAME])) {
+        if (!isset($extras[ConfigInterface::COMPOSER_EXTRA_NAME])) {
             $id->write('The parameter handler needs to be configured through the extra.file-copy setting.');
         } else {
-            $configs = $extras[MyPluginInterface::COMPOSER_EXTRA_NAME];
+            $configs = $extras[ConfigInterface::COMPOSER_EXTRA_NAME];
             if (!is_array($configs)) {
                 throw new InvalidArgumentException('The extra.file-copy setting must be an array or a configuration object.');
             }

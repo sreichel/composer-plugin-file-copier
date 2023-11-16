@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Sreichel\Composer\Plugin\FileCopy;
 
-interface MyPluginInterface
+/**
+ * Interface ConfigInterface
+ */
+interface ConfigInterface
 {
     public const COMPOSER_EXTRA_NAME = 'file-copy';
 
