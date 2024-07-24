@@ -79,27 +79,68 @@ class ScriptHandler implements PluginInterface, EventSubscriberInterface
      */
     public static function buildParameters(Event $event): void
     {
-        $io = $event->getIO();
-        $composer = $event->getComposer();
+        $io         = $event->getIO();
+        $composer   = $event->getComposer();
+        $locker     = $composer->getLocker();
+        $repo       = $locker->getLockedRepository();
 
+        $extrasCollection = [];
+
+        // get extras from project
         $extras = $composer->getPackage()->getExtra();
-        if (!isset($extras[ConfigInterface::COMPOSER_EXTRA_NAME])) {
-            $io->write('The parameter handler needs to be configured through the extra.file-copy setting.');
-        } else {
-            $configs = $extras[ConfigInterface::COMPOSER_EXTRA_NAME];
-            if (!is_array($configs)) {
-                throw new InvalidArgumentException('The extra.file-copy setting must be an array or a configuration object.');
-            }
+        if (isset($extras[ConfigInterface::COMPOSER_EXTRA_NAME])) {
+            $extrasCollection[$composer->getPackage()->getName()] = $extras[ConfigInterface::COMPOSER_EXTRA_NAME];
+        }
 
+        // get extras from installed packages
+        foreach ($repo->getPackages() as $package) {
+            $extras = $package->getExtra();
+            if (isset($extras[ConfigInterface::COMPOSER_EXTRA_NAME])) {
+                $extrasCollection[$package->getName()] = $extras[ConfigInterface::COMPOSER_EXTRA_NAME];
+            }
+        }
+
+        self::validateConfig($io, $extrasCollection);
+
+        if ($extrasCollection === []) {
+            $io->write('The parameter handler needs to be configured through the extra.file-copy settings.');
+        } else {
             $processor = new Processor($event);
 
-            foreach ($configs as $config) {
-                if (!is_array($config)) {
-                    throw new InvalidArgumentException('The extra.file-copy setting must be an array of configuration objects.');
+            foreach ($extrasCollection as $settings) {
+                foreach ($settings as $config) {
+                    /** @var array<string, string> $config */
+                    $processor->processCopy($config);
                 }
+            }
+        }
+    }
 
-                /** @var array<string, string> $config */
-                $processor->processCopy($config);
+    private static function validateConfig(IOInterface $io, array &$extrasCollection): void
+    {
+        foreach ($extrasCollection as $package => $settings) {
+            if (!is_array($settings)) {
+                unset($extrasCollection[$package]);
+
+                $io->write(sprintf(
+                    'The extra.file-copy setting must be an array or a configuration object in package %s.',
+                    $package
+                ));
+            }
+
+            foreach ($settings as $key => $config) {
+                if (!is_array($config)) {
+                    unset($extrasCollection[$package][$key]);
+
+                    $io->write(sprintf(
+                        'The extra.file-copy structure must be an array of configuration objects in package %s.',
+                        $package
+                    ));
+                }
+            }
+
+            if ($extrasCollection[$package] === []) {
+                unset($extrasCollection[$package]);
             }
         }
     }

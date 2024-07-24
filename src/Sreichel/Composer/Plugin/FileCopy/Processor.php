@@ -56,7 +56,6 @@ class Processor
         $this->composer = $event->getComposer();
 
         $vendorDir      = $event->getComposer()->getConfig()->get('vendor-dir');
-        assert(is_string($vendorDir));
         $this->vendor   = $vendorDir;
     }
 
@@ -104,7 +103,13 @@ class Processor
     protected function getProjectPath(): string
     {
         if ($this->projectPath === null) {
-            $this->projectPath = realpath($this->vendor . '/../') . '/';
+            $path = realpath($this->vendor . '/../') . '/';
+
+            $extras = $this->composer->getPackage()->getExtra();
+            if (isset($extras['magento-root-dir'])) {
+                $path .= $extras['magento-root-dir'] . '/';
+            }
+            $this->projectPath = $path;
         }
 
         return $this->projectPath;
