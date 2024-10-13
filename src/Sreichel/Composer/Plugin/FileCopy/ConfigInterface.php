@@ -9,11 +9,11 @@ namespace Sreichel\Composer\Plugin\FileCopy;
  */
 interface ConfigInterface
 {
-    public const COMPOSER_EXTRA_NAME = 'file-copy';
+    public const COMPOSER_EXTRA_NAME        = 'file-copy';
 
-    public const CONFIG_DEBUG  = 'debug';
+    public const CONFIG_DEBUG               = 'debug';
 
-    public const CONFIG_SOURCE = 'source';
+    public const CONFIG_SOURCE              = 'source';
 
-    public const CONFIG_TARGET = 'target';
+    public const CONFIG_TARGET              = 'target';
 }
