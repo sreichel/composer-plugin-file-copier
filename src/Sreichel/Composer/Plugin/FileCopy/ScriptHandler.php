@@ -109,7 +109,6 @@ class ScriptHandler implements PluginInterface, EventSubscriberInterface
 
             foreach ($extrasCollection as $settings) {
                 foreach ($settings as $config) {
-                    /** @var array<string, string> $config */
                     $processor->processCopy($config);
                 }
             }

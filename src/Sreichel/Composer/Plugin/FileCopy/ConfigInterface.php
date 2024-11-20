@@ -16,4 +16,6 @@ interface ConfigInterface
     public const CONFIG_SOURCE              = 'source';
 
     public const CONFIG_TARGET              = 'target';
+
+    public const TYPE_MAGENTO_SOURE        = 'magento-source';
 }
