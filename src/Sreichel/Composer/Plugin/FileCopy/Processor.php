@@ -9,6 +9,7 @@ use Composer\IO\IOInterface;
 use Composer\Script\Event;
 use Directory;
 use InvalidArgumentException;
+
 use function basename;
 use function copy;
 use function dir;
@@ -25,14 +26,16 @@ use function symlink;
 /**
  * Class Processor
  */
-class Processor
+class Processor implements ConfigInterface
 {
     protected Composer $composer;
 
     protected IOInterface $io;
 
-    protected ?string $projectPath = null;
+    /** @var array<int, string>|null */
+    protected ?array $projectPath = [];
 
+    protected string $package;
     protected string $vendor;
 
     /**
@@ -53,67 +56,54 @@ class Processor
     /**
      * @param array{source: string, target: string, debug: bool} $config
      */
-    public function processCopy(array $config): void
+    public function processCopy(string $packageName, array $config): void
     {
+        $this->package = $packageName;
         $this->config = $config;
         $this->processConfig();
 
-        $projectPath = $this->getProjectPath();
+        $projectPath = $this->getProjectPath(true);
 
-        $configSource = $this->getSourceFromConfig();
-        $isLocalPath = str_starts_with($configSource, '/');
-
-        if ($isLocalPath) {
-            $configSource = ltrim($configSource, '/');
-        } else {
-            $configSource = $this->vendor . '/' . $configSource;
-        }
-
-        $sources = glob($configSource, GLOB_MARK + GLOB_BRACE);
+        $sourceFromConfig = $this->getSourceFromConfig();
+        $sources = glob($sourceFromConfig, GLOB_MARK + GLOB_BRACE);
         if ($sources === [] || $sources === false) {
-            $this->io->write('No source files found: ' . $configSource);
+            $this->io->write('No source files found: ' . $sourceFromConfig);
             return;
         }
 
-        $target = $this->getTargetFromConfig();
+        $targetFromConfig = $this->getTargetFromConfig();
 
         if ($this->getDebugFromConfig()) {
-            $this->io->write('Package type: ' . $this->getPackageType());
-            $this->io->write('Source: ' . $configSource);
-            $this->io->write('Target: ' . $target);
+            $this->io->write('Source: ' . $sourceFromConfig);
+            $this->io->write('Target: ' . $targetFromConfig);
         }
 
         foreach ($sources as $source) {
-            $this->copyr($source, $target, $projectPath);
+            $this->copyr($source, $targetFromConfig, $projectPath);
         }
     }
 
-    protected function getPackageType(): string
+    protected function getProjectPath(bool $withTpye): string
     {
-        return $this->composer->getPackage()->getType();
-    }
-
-    protected function getProjectPath(): string
-    {
-        if ($this->projectPath === null) {
-            $path = $this->getProjectPathByType();
-            $this->projectPath = $path;
+        $withTpyeKey = (int) $withTpye;
+        if (!array_key_exists($withTpyeKey, $this->projectPath)) {
+            $path = $this->getProjectPathByType($withTpye);
+            $this->projectPath[$withTpyeKey] = $path;
         }
-        return $this->projectPath;
+        return $this->projectPath[$withTpyeKey];
     }
 
-    protected function getProjectPathByType(): string
+    private function getProjectPathByType(bool $withTpye): string
     {
         $path = realpath($this->vendor . '/../') . '/';
-        $type = $this->getPackageType();
+        if (!$withTpye) {
+            return $path;
+        }
 
-        switch ($type) {
-            case ConfigInterface::TYPE_MAGENTO_SOURE:
-                $extras = $this->composer->getPackage()->getExtra();
-                $magentoRootDir = 'magento-root-dir';
-                if (array_key_exists($magentoRootDir, $extras)) {
-                    $path .= $extras[$magentoRootDir] . '/';
-                }
+        $extras = $this->composer->getPackage()->getExtra();
+        switch ($extras) {
+            case array_key_exists(self::EXTRA_MAGENTO_ROOT_DIR, $extras):
+                $path .= $extras[self::EXTRA_MAGENTO_ROOT_DIR] . '/';
                 return $path;
             default:
                 return $path;
@@ -122,11 +112,11 @@ class Processor
 
     private function processConfig(): void
     {
-        if (empty($this->config[ConfigInterface::CONFIG_SOURCE])) {
+        if (empty($this->config[self::CONFIG_SOURCE])) {
             throw new InvalidArgumentException('The extra.file-copy.source setting is required to use this script handler.');
         }
 
-        if (empty($this->config[ConfigInterface::CONFIG_TARGET])) {
+        if (empty($this->config[self::CONFIG_TARGET])) {
             throw new InvalidArgumentException('The extra.file-copy.target setting is required to use this script handler.');
         }
 
@@ -136,35 +126,51 @@ class Processor
     private function setDebugFromConfig(): void
     {
         if ($this->io->isVerbose()) {
-            $this->config[ConfigInterface::CONFIG_DEBUG] = true;
+            $this->config[self::CONFIG_DEBUG] = true;
             return;
         }
 
-        if (empty($this->config[ConfigInterface::CONFIG_DEBUG])) {
-            $this->config[ConfigInterface::CONFIG_DEBUG] = false;
+        if (empty($this->config[self::CONFIG_DEBUG])) {
+            $this->config[self::CONFIG_DEBUG] = false;
             return;
         }
 
-        $this->config[ConfigInterface::CONFIG_DEBUG] = in_array($this->config[ConfigInterface::CONFIG_DEBUG], ['true', true], true);
+        $this->config[self::CONFIG_DEBUG] = in_array($this->config[self::CONFIG_DEBUG], ['true', true], true);
     }
 
     protected function getDebugFromConfig(): bool
     {
-        return $this->config[ConfigInterface::CONFIG_DEBUG];
+        return $this->config[self::CONFIG_DEBUG];
     }
 
     protected function getSourceFromConfig(): string
     {
-        return $this->config[ConfigInterface::CONFIG_SOURCE];
+        $configPath = $this->config[self::CONFIG_SOURCE];
+
+        $isLocalPath = str_starts_with($configPath, '/');
+        if ($isLocalPath) {
+            $packageName = $this->composer->getPackage()->getName();
+            if ($this->package === $packageName) {
+                $path = realpath($this->vendor . '/../') . '/';
+                $configPath = $path . ltrim($configPath, '/');
+            } else {
+                $configPath = $this->vendor . '/' . $this->package . '/' . ltrim($configPath, '/');
+            }
+        } else {
+            $configPath = $this->vendor . '/' . $configPath;
+        }
+
+        return $configPath;
     }
 
     protected function getTargetFromConfig(): string
     {
-        /** @var string $target */
-        $target = $this->config[ConfigInterface::CONFIG_TARGET];
-
-        if ($target === '' || !str_starts_with($target, '/')) {
-            $target = $this->getProjectPath() . $target;
+        /** @var string $targetFromConfig */
+        $targetFromConfig = $this->config[self::CONFIG_TARGET];
+        if (str_starts_with('/', $targetFromConfig)) {
+            $target = $this->getProjectPath(false) . $targetFromConfig;
+        } else {
+            $target = $this->getProjectPath(true) . $targetFromConfig;
         }
 
         if (realpath($target) === false) {
@@ -207,7 +213,7 @@ class Processor
                 case is_dir($source):
                     $this->copyDirectory($projectPath, $source, $target);
                     break;
-                // Simple copy for a file
+                    // Simple copy for a file
                 case is_file($source):
                     $this->copyFile($projectPath, $source, $target);
                     break;

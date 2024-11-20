@@ -9,12 +9,11 @@ use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
-use InvalidArgumentException;
 
 /**
  * Class ScriptHandler
  */
-class ScriptHandler implements PluginInterface, EventSubscriberInterface
+class ScriptHandler implements ConfigInterface, PluginInterface, EventSubscriberInterface
 {
     /**
      * @var Composer $composer
@@ -88,15 +87,15 @@ class ScriptHandler implements PluginInterface, EventSubscriberInterface
 
         // get extras from project
         $extras = $composer->getPackage()->getExtra();
-        if (isset($extras[ConfigInterface::COMPOSER_EXTRA_NAME])) {
-            $extrasCollection[$composer->getPackage()->getName()] = $extras[ConfigInterface::COMPOSER_EXTRA_NAME];
+        if (isset($extras[self::COMPOSER_EXTRA_NAME])) {
+            $extrasCollection[$composer->getPackage()->getName()] = $extras[self::COMPOSER_EXTRA_NAME];
         }
 
         // get extras from installed packages
         foreach ($repo->getPackages() as $package) {
             $extras = $package->getExtra();
-            if (isset($extras[ConfigInterface::COMPOSER_EXTRA_NAME])) {
-                $extrasCollection[$package->getName()] = $extras[ConfigInterface::COMPOSER_EXTRA_NAME];
+            if (isset($extras[self::COMPOSER_EXTRA_NAME])) {
+                $extrasCollection[$package->getName()] = $extras[self::COMPOSER_EXTRA_NAME];
             }
         }
 
@@ -107,9 +106,9 @@ class ScriptHandler implements PluginInterface, EventSubscriberInterface
         } else {
             $processor = new Processor($event);
 
-            foreach ($extrasCollection as $settings) {
+            foreach ($extrasCollection as $packageName => $settings) {
                 foreach ($settings as $config) {
-                    $processor->processCopy($config);
+                    $processor->processCopy($packageName, $config);
                 }
             }
         }

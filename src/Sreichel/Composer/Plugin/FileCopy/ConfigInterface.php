@@ -17,5 +17,5 @@ interface ConfigInterface
 
     public const CONFIG_TARGET              = 'target';
 
-    public const TYPE_MAGENTO_SOURE        = 'magento-source';
+    public const EXTRA_MAGENTO_ROOT_DIR     = 'magento-root-dir';
 }
