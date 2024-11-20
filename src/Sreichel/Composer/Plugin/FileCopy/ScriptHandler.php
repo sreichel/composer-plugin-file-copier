@@ -106,9 +106,9 @@ class ScriptHandler implements ConfigInterface, PluginInterface, EventSubscriber
         } else {
             $processor = new Processor($event);
 
-            foreach ($extrasCollection as $settings) {
+            foreach ($extrasCollection as $packageName => $settings) {
                 foreach ($settings as $config) {
-                    $processor->processCopy($config);
+                    $processor->processCopy($packageName, $config);
                 }
             }
         }

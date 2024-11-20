@@ -32,8 +32,10 @@ class Processor implements ConfigInterface
 
     protected IOInterface $io;
 
-    protected ?string $projectPath = null;
+    /** @var array<int, string>|null */
+    protected ?array $projectPath = [];
 
+    protected string $package;
     protected string $vendor;
 
     /**
@@ -54,12 +56,13 @@ class Processor implements ConfigInterface
     /**
      * @param array{source: string, target: string, debug: bool} $config
      */
-    public function processCopy(array $config): void
+    public function processCopy(string $packageName, array $config): void
     {
+        $this->package = $packageName;
         $this->config = $config;
         $this->processConfig();
 
-        $projectPath = $this->getProjectPath();
+        $projectPath = $this->getProjectPath(true);
 
         $sourceFromConfig = $this->getSourceFromConfig();
         $sources = glob($sourceFromConfig, GLOB_MARK + GLOB_BRACE);
@@ -80,18 +83,22 @@ class Processor implements ConfigInterface
         }
     }
 
-    protected function getProjectPath(): string
+    protected function getProjectPath(bool $withTpye): string
     {
-        if ($this->projectPath === null) {
-            $path = $this->getProjectPathByType();
-            $this->projectPath = $path;
+        $withTpyeKey = (int) $withTpye;
+        if (!array_key_exists($withTpyeKey, $this->projectPath)) {
+            $path = $this->getProjectPathByType($withTpye);
+            $this->projectPath[$withTpyeKey] = $path;
         }
-        return $this->projectPath;
+        return $this->projectPath[$withTpyeKey];
     }
 
-    private function getProjectPathByType(): string
+    private function getProjectPathByType(bool $withTpye): string
     {
         $path = realpath($this->vendor . '/../') . '/';
+        if (!$withTpye) {
+            return $path;
+        }
 
         $extras = $this->composer->getPackage()->getExtra();
         switch ($extras) {
@@ -142,7 +149,13 @@ class Processor implements ConfigInterface
 
         $isLocalPath = str_starts_with($configPath, '/');
         if ($isLocalPath) {
-            $configPath = ltrim($configPath, '/');
+            $packageName = $this->composer->getPackage()->getName();
+            if ($this->package === $packageName) {
+                $path = realpath($this->vendor . '/../') . '/';
+                $configPath = $path . ltrim($configPath, '/');
+            } else {
+                $configPath = $this->vendor . '/' . $this->package . '/' . ltrim($configPath, '/');
+            }
         } else {
             $configPath = $this->vendor . '/' . $configPath;
         }
@@ -153,8 +166,12 @@ class Processor implements ConfigInterface
     protected function getTargetFromConfig(): string
     {
         /** @var string $targetFromConfig */
-        $targetFromConfig = $this->config[self::CONFIG_TARGET];
-        $target = $this->getProjectPath() . $targetFromConfig;
+        $configPath = $this->config[self::CONFIG_TARGET];
+        if (str_starts_with($configPath, '/')) {
+            $target = $this->getProjectPath(false) . ltrim($configPath, '/');
+        } else {
+            $target = $this->getProjectPath(true) . $configPath;
+        }
 
         if (realpath($target) === false) {
             mkdir($target, 0755, true);
